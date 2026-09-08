@@ -1,8 +1,8 @@
 package compiler;
 
 import compiler.scanner.Scanner;
-import compiler.scanner.Token;
 import compiler.scanner.Tag;
+import compiler.scanner.Token;
 
 public class Main {
 
@@ -32,7 +32,7 @@ public class Main {
             token = scanner.yylex();
             while (token.tag != Tag.EOF) {
                 System.out.println("Token: " + token);
-
+                token = scanner.yylex();
             }
         } catch (Exception e) {
             System.out.println("Exceção: " + e.getMessage());
