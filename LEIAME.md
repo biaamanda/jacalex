@@ -27,12 +27,12 @@ Esta parte faz apenas a análise léxica; não verifica a estrutura dos comandos
 
 ## Testes
 
-O arquivo `teste-a.input` contém todos os terminais válidos, incluindo os seis
+O arquivo `tests/valid-test.input` contém todos os terminais válidos, incluindo os seis
 operadores relacionais e números inteiros, decimais e em notação científica.
 
 ```bash
 mvn clean package
-java -jar target/jacalex.jar teste-a.input
+java -jar target/jacalex.jar tests/valid-test.input
 ```
 
 Por exemplo, `x = 10 + 2;` produz:
@@ -50,7 +50,7 @@ Análise léxica terminada com sucesso!
 Para testar um símbolo inválido:
 
 ```bash
-java -jar target/jacalex.jar teste-invalido.input
+java -jar target/jacalex.jar tests/invalid-test.input
 ```
 
 O programa para no `@` e informa o erro na linha 1, coluna 8.
@@ -90,5 +90,5 @@ java -jar jacalex.jar # para executar o analisador lendo a expressão que você 
 ou
 
 ```bash
-java -jar jacalex.jar ../teste-a.input # para executar o analisador abrindo arquivo de testes
+java -jar jacalex.jar ../tests/valid-test.input # para executar o analisador abrindo arquivo de testes
 ```
