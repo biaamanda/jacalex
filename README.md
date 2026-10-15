@@ -7,7 +7,7 @@ A classe `compiler.parser.Parser` implementa um analisador descendente recursivo
 O `Main` cria o `Scanner`, passa para o `Parser` e chama `parse()`.
 
 ```bash
-java -jar target/jacaparser.jar tests/syntax-valid.input
+java -jar target/jacalex.jar tests/syntax-valid.input
 ```
 
 Saída esperada para um programa correto:
@@ -54,7 +54,7 @@ operadores relacionais e números inteiros, decimais e em notação científica.
 
 ```bash
 mvn clean package
-java -jar target/jacaparser.jar tests/valid-test.input
+java -jar target/jacalex.jar tests/valid-test.input
 ```
 
 Por exemplo, `x = 10 + 2;` produz:
@@ -72,7 +72,7 @@ Análise léxica terminada com sucesso!
 Para testar um símbolo inválido:
 
 ```bash
-java -jar target/jacaparser.jar tests/invalid-test.input
+java -jar target/jacalex.jar tests/invalid-test.input
 ```
 
 O programa para no `@` e informa o erro na linha 1, coluna 8.
@@ -106,11 +106,11 @@ mvn clean package
 Para executar o jar, altere para a pasta `target` do projeto e execute no terminal:
 
 ```bash
-java -jar jacaparser.jar # para executar o analisador lendo a expressão que você digitar
+java -jar jacalex.jar # para executar o analisador lendo a expressão que você digitar
 ```
 
 ou
 
 ```bash
-java -jar jacaparser.jar ../tests/valid-test.input # para executar o analisador abrindo arquivo de testes
+java -jar jacalex.jar ../tests/valid-test.input # para executar o analisador abrindo arquivo de testes
 ```
