@@ -23,16 +23,12 @@ public class Main {
                 }
             }
         }
-        // sem entrada (arquivo inexistente ou argumentos demais), não há o que analisar
         if (reader == null) {
             return;
         }
         try {
-            // Cria o analisador léxico
             Scanner scanner = new Scanner(reader);
-            // Cria o analisador sintático, que consome os tokens do scanner
             Parser parser = new Parser(scanner);
-            // Executa a análise
             parser.parse();
         } catch (Exception e) {
             System.out.println("Exceção: " + e.getMessage());
