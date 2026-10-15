@@ -1,8 +1,7 @@
 package compiler;
 
+import compiler.parser.Parser;
 import compiler.scanner.Scanner;
-import compiler.scanner.Tag;
-import compiler.scanner.Token;
 
 public class Main {
 
@@ -12,7 +11,7 @@ public class Main {
             reader = new java.io.InputStreamReader(System.in);
         } else {
             if (args.length != 1) {
-                System.out.println("Uso : java -jar jacalex <nome do arquivo>");
+                System.out.println("Uso : java -jar jacaparser <nome do arquivo>");
             } else {
                 try {
                     java.io.FileInputStream stream = new java.io.FileInputStream(args[0]);
@@ -24,19 +23,19 @@ public class Main {
                 }
             }
         }
+        // sem entrada (arquivo inexistente ou argumentos demais), não há o que analisar
+        if (reader == null) {
+            return;
+        }
         try {
             // Cria o analisador léxico
             Scanner scanner = new Scanner(reader);
-            // Testar aqui no programa principal
-            Token token;
-            token = scanner.yylex();
-            while (token.tag != Tag.EOF) {
-                System.out.println("Token: " + token);
-                token = scanner.yylex();
-            }
+            // Cria o analisador sintático, que consome os tokens do scanner
+            Parser parser = new Parser(scanner);
+            // Executa a análise
+            parser.parse();
         } catch (Exception e) {
             System.out.println("Exceção: " + e.getMessage());
         }
-
     }
 }
