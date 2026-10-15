@@ -11,7 +11,7 @@ public class Main {
             reader = new java.io.InputStreamReader(System.in);
         } else {
             if (args.length != 1) {
-                System.out.println("Uso : java -jar jacaparser <nome do arquivo>");
+                System.out.println("Uso : java -jar jacalex <nome do arquivo>");
             } else {
                 try {
                     java.io.FileInputStream stream = new java.io.FileInputStream(args[0]);

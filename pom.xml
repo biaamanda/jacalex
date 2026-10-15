@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.compiler</groupId>
-    <artifactId>jacaparser</artifactId>
+    <artifactId>jacalex</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>Parser for Jaca</name>
+    <name>Lexer for Jaca</name>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -18,7 +18,7 @@
     </properties>
 
     <build>
-        <finalName>jacaparser</finalName>
+        <finalName>jacalex</finalName>
         <plugins>
             <!-- Plugin do JFlex gerando o scanner dentro do pacote compiler.scanner -->
             <plugin>
