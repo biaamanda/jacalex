@@ -1,0 +1,68 @@
+package parser;
+
+import java_cup.runtime.*;
+
+parser code {:
+    public void syntax_error(Symbol token) {
+        String found = token.value == null ? "fim da entrada" : "\"" + token.value + "\"";
+        throw new RuntimeException("Erro durante a análise sintática: marca inesperada " + found + "\n" +
+                "Linha: " + (token.left + 1) + " e Coluna: " + (token.right + 1));
+    }
+:}
+
+terminal IF, THEN, ELSE, WHILE;
+terminal ASSIGN, SEMI, LPAREN, RPAREN, LBRACE, RBRACE;
+terminal String ID, NUMBER, ADD_OPERATOR, MUL_OPERATOR, REL_OPERATOR;
+
+non terminal program, statement_list, statement;
+non terminal assign_stmt, if_stmt, while_stmt, block_stmt, null_stmt;
+non terminal expression, simple_expr, term, factor;
+
+start with program;
+
+program ::= statement_list
+    ;
+
+statement_list ::= statement_list statement
+    | statement
+    ;
+
+statement ::= assign_stmt
+    | if_stmt
+    | while_stmt
+    | block_stmt
+    | null_stmt
+    ;
+
+assign_stmt ::= ID ASSIGN expression SEMI
+    ;
+
+if_stmt ::= IF LPAREN expression RPAREN THEN block_stmt
+    | IF LPAREN expression RPAREN THEN block_stmt ELSE block_stmt
+    ;
+
+while_stmt ::= WHILE LPAREN expression RPAREN block_stmt
+    ;
+
+block_stmt ::= LBRACE statement_list RBRACE
+    ;
+
+null_stmt ::= SEMI
+    ;
+
+expression ::= simple_expr
+    | simple_expr REL_OPERATOR simple_expr
+    ;
+
+simple_expr ::= term
+    | simple_expr ADD_OPERATOR term
+    ;
+
+term ::= factor
+    | term MUL_OPERATOR factor
+    ;
+
+factor ::= ID
+    | NUMBER
+    | LPAREN expression RPAREN
+    ;
