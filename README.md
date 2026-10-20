@@ -1,116 +1,65 @@
-# Analisador léxico e sintático de Jaca
+# Jaca: analisadores léxico e sintáticos
 
-## Parte II: analisador sintático
+Projeto da disciplina ECM253 (Linguagens Formais, Autômatos e Compiladores).
+**Jaca** (*Just Another Compiler Attempt*) é uma linguagem simples com atribuição,
+`if/then/else`, `while`, blocos `{ }`, comando vazio `;` e expressões aritméticas
+e relacionais.
 
-A classe `compiler.parser.Parser` implementa um analisador descendente recursivo
-(LL(1)): cada regra da gramática é um método e o token atual decide o caminho.
-O `Main` cria o `Scanner`, passa para o `Parser` e chama `parse()`.
+Cada pasta é um projeto Maven independente, com o seu próprio `README.md`.
+
+| Pasta | Analisador | Técnica | Saída para um programa correto |
+| --- | --- | --- | --- |
+| [`1-analisador-lexico`](1-analisador-lexico) | Léxico (Parte I) | JFlex | lista os tokens reconhecidos |
+| [`2-analisador-recursivo-descendente`](2-analisador-recursivo-descendente) | Sintático (Parte II) | descendente recursivo, escrito à mão | "Análise sintática terminada com sucesso!" |
+| [`3-analisador-cup`](3-analisador-cup) | Sintático (CUP) | LALR(1), gerado pelo CUP | "Análise sintática terminada com sucesso!" |
+
+## Como as partes se relacionam
+
+```text
+texto do programa ──▶ analisador léxico ──▶ tokens ──▶ analisador sintático ──▶ correto / erro
+                      (Parte I, JFlex)                  (Parte II ou CUP)
+```
+
+- A **Parte I** só quebra o texto em tokens (`ID`, `NUMBER`, `IF`, ...).
+- A **Parte II** reaproveita esse scanner e acrescenta o `Parser`, que confere se os
+  tokens formam um programa válido pela gramática.
+- A pasta **CUP** faz o mesmo trabalho da Parte II, mas o parser é gerado
+  automaticamente a partir da gramática, em vez de escrito à mão.
+
+A Parte I também está preservada na tag `parte-1` do repositório.
+
+## Requisitos
+
+- JDK 17 ou superior
+- Apache Maven 3.9 ou superior (`mvn -version`)
+
+## Como executar qualquer parte
+
+Entre na pasta da parte desejada, compile e execute (os comandos exatos estão no README
+de cada pasta):
 
 ```bash
+cd 2-analisador-recursivo-descendente
+mvn clean package
 java -jar target/jacalex.jar tests/syntax-valid.input
 ```
 
-Saída esperada para um programa correto:
+## A linguagem Jaca
 
 ```text
-Análise léxica terminada com sucesso!
-Análise sintática terminada com sucesso!
+program        = statement_list, EOF;
+statement_list = statement, {statement};
+statement      = assign_stmt | if_stmt | while_stmt | block_stmt | null_stmt;
+assign_stmt    = ID, "=", expression, ";";
+if_stmt        = "if", "(", expression, ")", "then", block_stmt, ["else", block_stmt];
+while_stmt     = "while", "(", expression, ")", block_stmt;
+block_stmt     = "{", statement_list, "}";
+null_stmt      = ";";
+expression     = simple_expr, [REL_OPERATOR, simple_expr];
+simple_expr    = term, {ADD_OPERATOR, term};
+term           = factor, {MUL_OPERATOR, factor};
+factor         = ID | NUMBER | "(", expression, ")";
 ```
 
-Para um programa incorreto, o parser para no primeiro erro e informa a marca esperada, a
-recebida, a linha e a coluna. Casos de erro em `tests/syntax-invalid-*.input`.
-
-## Parte I: analisador léxico
-
-O programa lê a entrada e exibe a classificação de cada terminal (token).
-Espaços, tabulações e quebras de linha são ignorados.
-O token `EOF` encerra a leitura e não é impresso pelo `Main` original.
-
-| Terminal | Classificação (`Tag`) |
-| --- | --- |
-| Identificador, como `x`, `_valor1` ou `ifx` | `ID` |
-| Número, como `10`, `12.5` ou `1.2e-3` | `NUMBER` |
-| `if`, `then`, `else`, `while` | `IF`, `THEN`, `ELSE`, `WHILE` |
-| `=` | `ASSIGN` |
-| `+`, `-` | `ADD_OPERATOR` |
-| `*`, `/`, `%` | `MUL_OPERATOR` |
-| `==`, `!=`, `<`, `>`, `<=`, `>=` | `REL_OPERATOR` |
-| `(`, `)` | `LEFT_PAR`, `RIGHT_PAR` |
-| `{`, `}` | `LEFT_BRACE`, `RIGHT_BRACE` |
-| `;` | `SEMICOLON` |
-| Fim da entrada (marca `-1` no enunciado) | `EOF` |
-
-As regras estão em `src/main/jflex/scanner.jflex`. O Maven usa esse arquivo
-para gerar `Scanner.java`. `IdentifierToken`, `NumberToken` e `OperatorToken`
-herdam de `Token` e guardam também o texto reconhecido (lexema).
-
-A divisão usa barra comum (`/`), conforme a correção do professor.
-Esta parte faz apenas a análise léxica; não verifica a estrutura dos comandos.
-
-## Testes
-
-O arquivo `tests/valid-test.input` contém todos os terminais válidos, incluindo os seis
-operadores relacionais e números inteiros, decimais e em notação científica.
-
-```bash
-mvn clean package
-java -jar target/jacalex.jar tests/valid-test.input
-```
-
-Por exemplo, `x = 10 + 2;` produz:
-
-```text
-Token: <ID, x>
-Token: <ASSIGN>
-Token: <NUMBER, 10>
-Token: <ADD_OPERATOR, +>
-Token: <NUMBER, 2>
-Token: <SEMICOLON>
-Análise léxica terminada com sucesso!
-```
-
-Para testar um símbolo inválido:
-
-```bash
-java -jar target/jacalex.jar tests/invalid-test.input
-```
-
-O programa para no `@` e informa o erro na linha 1, coluna 8.
-Outros exemplos inválidos para testar separadamente são `!`, `&`, `\`, `.5`
-e `1.`. Já `-2` gera um operador `-` seguido do número `2`.
-
-## Instruções de instalação e execução
-
-Para **compilar** e **criar** o **arquivo** **jar** do **programa** de modo **automático**, você precisa instalar o **programa** **Apache** **Maven**. 
-
-- Se estiver usando **Windows**:
-  - Abra https://maven.apache.org/download.cgi
-  - Baixe https://dlcdn.apache.org/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.zip
-  - Descompacte o conteúdo e a adicione ao PATH a pasta que contem o executável `mvn`
-- Se estiver usando algum Linux, use o gerenciador de pacotes próprio (exemplos):
-  - `sudo apt install maven` (Debian, Ubuntu, etc)
-  - `dnf install maven` (Red Hat, Fedora, etc)
-
-Para compilar o projeto, abra um terminal na pasta que tem o arquivo `pom.xml` e execute:
-
-```bash
-mvn clean compile
-```
-
-Para compilar e criar o arquivo **jar** do projeto, abra um terminal na pasta que tem o arquivo `pom.xml` e execute:
-
-```bash
-mvn clean package
-```
-
-Para executar o jar, altere para a pasta `target` do projeto e execute no terminal:
-
-```bash
-java -jar jacalex.jar # para executar o analisador lendo a expressão que você digitar
-```
-
-ou
-
-```bash
-java -jar jacalex.jar ../tests/valid-test.input # para executar o analisador abrindo arquivo de testes
-```
+Terminais: `ID = [A-Za-z_][A-Za-z_0-9]*`, `NUMBER = [0-9]+(\.[0-9]+)?([Ee][+-]?[0-9]+)?`,
+`ADD_OPERATOR = [+-]`, `MUL_OPERATOR = [*/%]`, `REL_OPERATOR = (==|!=|<|>|<=|>=)`.

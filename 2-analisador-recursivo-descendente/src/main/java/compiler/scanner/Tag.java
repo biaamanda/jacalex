@@ -1,0 +1,10 @@
+package compiler.scanner;
+
+public enum Tag {
+    ID, NUMBER,
+    IF, THEN, ELSE, WHILE,
+    ASSIGN,
+    ADD_OPERATOR, MUL_OPERATOR, REL_OPERATOR,
+    LEFT_PAR, RIGHT_PAR, LEFT_BRACE, RIGHT_BRACE, SEMICOLON,
+    EOF
+}
