@@ -1,38 +1,7 @@
-package parser;
+package interpreter;
 
+import ast.*;
 import java_cup.runtime.*;
-import java.util.*;
-
-action code {:
-    private final Stack<HashMap<String, Value>> tableStack = new Stack<>();
-
-    {
-        tableStack.push(new HashMap<>());
-    }
-
-    private void pushScope() {
-        tableStack.push(new HashMap<>());
-    }
-
-    private void popScope() {
-        tableStack.pop();
-    }
-
-    private void assign(String name, Value value) {
-        tableStack.peek().put(name, value);
-    }
-
-    private Value lookup(String name) {
-        ListIterator<HashMap<String, Value>> it = tableStack.listIterator(tableStack.size());
-        while (it.hasPrevious()) {
-            HashMap<String, Value> table = it.previous();
-            if (table.containsKey(name)) {
-                return table.get(name);
-            }
-        }
-        throw new RuntimeException("Variável não definida: " + name);
-    }
-:}
 
 parser code {:
     public void syntax_error(Symbol token) {
@@ -48,9 +17,10 @@ terminal PLUS, MINUS, TIMES, DIVIDE, MOD, POWER, UMINUS;
 terminal Double NUMBER;
 terminal String ID, STRING;
 
-non terminal program, command_list, command_part, command_block;
-non terminal command, assignment_command, print_command;
-non terminal Value expr;
+non terminal program;
+non terminal BlockCommand command_list;
+non terminal Command command_part, command_block, command, assignment_command, print_command;
+non terminal Expression expr;
 
 precedence left PLUS, MINUS;
 precedence left TIMES, DIVIDE, MOD;
@@ -59,58 +29,66 @@ precedence right POWER;
 
 start with program;
 
-program ::= command_list
+program ::= command_list:l
+        {: new Program(l.commands).accept(new InterpreterVisitor()); :}
     ;
 
-command_list ::= command_list command_part
-    | command_part
+command_list ::= command_list:l command_part:p
+        {: l.add(p); RESULT = l; :}
+    | command_part:p
+        {: BlockCommand l = new BlockCommand(); l.add(p); RESULT = l; :}
     ;
 
-command_part ::= command SEMI
-    | command_block
+command_part ::= command:c SEMI
+        {: RESULT = c; :}
+    | command_block:b
+        {: RESULT = b; :}
     ;
 
-command_block ::= LBRACE {: pushScope(); :} command_list RBRACE {: popScope(); :}
+command_block ::= LBRACE command_list:l RBRACE
+        {: RESULT = l; :}
     ;
 
-command ::= assignment_command
-    | print_command
+command ::= assignment_command:c
+        {: RESULT = c; :}
+    | print_command:c
+        {: RESULT = c; :}
     ;
 
 assignment_command ::= ID:id ASSIGN expr:e
-        {: assign(id, e); :}
+        {: RESULT = new AssignCommand(id, e); :}
     ;
 
 print_command ::= PRINT LPAREN expr:e RPAREN
-        {: System.out.println(">> " + e); :}
+        {: RESULT = new PrintCommand(e); :}
     ;
 
 expr ::= expr:e1 PLUS expr:e2
-        {: RESULT = Operations.add(e1, e2); :}
+        {: RESULT = new SumExpr(e1, e2); :}
     | expr:e1 MINUS expr:e2
-        {: RESULT = Operations.subtract(e1, e2); :}
+        {: RESULT = new SubExpr(e1, e2); :}
     | expr:e1 TIMES expr:e2
-        {: RESULT = Operations.multiply(e1, e2); :}
+        {: RESULT = new MulExpr(e1, e2); :}
     | expr:e1 DIVIDE expr:e2
-        {: RESULT = Operations.divide(e1, e2); :}
+        {: RESULT = new DivExpr(e1, e2); :}
     | expr:e1 MOD expr:e2
-        {: RESULT = Operations.mod(e1, e2); :}
+        {: RESULT = new ModExpr(e1, e2); :}
     | expr:e1 POWER expr:e2
-        {: RESULT = Operations.power(e1, e2); :}
+        {: RESULT = new PowExpr(e1, e2); :}
     | MINUS expr:e
-        {: RESULT = Operations.negate(e); :} %prec UMINUS
+        {: RESULT = new UMinusExpr(e); :} %prec UMINUS
     | LPAREN expr:e RPAREN
         {: RESULT = e; :}
     | NUMBER:n
-        {: RESULT = new Value(n); :}
+        {: RESULT = new NumberExpr(n); :}
     | STRING:s
-        {: RESULT = new Value(s); :}
+        {: RESULT = new StringExpr(s); :}
     | ID:id
-        {: RESULT = lookup(id); :}
+        {: RESULT = new IdExpr(id); :}
     | SIN LPAREN expr:e RPAREN
-        {: RESULT = Operations.sin(e); :}
+        {: RESULT = new SinExpr(e); :}
     | COS LPAREN expr:e RPAREN
-        {: RESULT = Operations.cos(e); :}
+        {: RESULT = new CosExpr(e); :}
     | PI
-        {: RESULT = new Value(Math.PI); :}
+        {: RESULT = new PiExpr(); :}
     ;

@@ -1,16 +1,51 @@
-# 4. Interpretador com CUP: tipos e escopos
+# 4. Interpretador com CUP: AST, Visitor, tipos e escopos
 
 Interpretador de uma pequena linguagem de comandos (atribuição, `print`, expressões
-aritméticas) feito com **JFlex + CUP**, com ações semânticas executadas durante a análise.
+aritméticas) feito com **JFlex + CUP**. O parser **não executa nada**: ele só constrói uma
+**árvore sintática abstrata (AST)**, e um **Visitor** percorre a árvore para interpretá-la.
 Implementa os requisitos R1 a R5 do projeto "Analisador CUP com Tipos e Escopos":
 
 - dois tipos de dados: **número real** (`Double`) e **cadeia de caracteres** (`String`);
 - operações que verificam e convertem tipos;
 - **blocos** `{ }` que criam **escopos**, controlados por uma pilha de tabelas de símbolos.
 
-> O projeto anterior ("Analisador CUP com Ações Semânticas") não estava disponível, então
-> esta pasta traz o interpretador completo: variáveis, `print`, `sin`, `cos`, `PI` e `**`
-> também foram implementados aqui.
+> O projeto anterior ("Ações Semânticas") não estava disponível, então esta pasta traz o
+> interpretador completo (variáveis, `print`, `sin`, `cos`, `PI`, `**`). A estrutura segue os
+> exemplos "AST Expression Parser" e "AST Visitor".
+
+## Como funciona
+
+```text
+texto ──▶ Scanner (JFlex) ──▶ tokens ──▶ Parser (CUP) ──▶ AST ──▶ InterpreterVisitor ──▶ saída
+                                          monta os nós          percorre a árvore e executa
+```
+
+1. O **Parser** reconhece a gramática e, em cada regra, cria um nó (`new SumExpr(e1, e2)`,
+   `new PrintCommand(e)`, ...). Ao reduzir `program`, a árvore inteira está pronta.
+2. O **InterpreterVisitor** visita a árvore: cada nó chama `accept(visitor)`, que chama o
+   `visit` específico daquele tipo de nó (padrão Visitor).
+3. Como a execução só começa depois da análise completa, **um erro de sintaxe impede qualquer
+   saída**; erros de tipo e de variável aparecem durante a execução.
+
+## Estrutura
+
+```text
+src/main
+├── cup/parser.cup                  gramática; monta a AST
+├── jflex/scanner.jflex             tokens
+└── java
+    ├── interpreter/Main.java       lê o arquivo, cria Scanner e Parser
+    └── ast/
+        ├── Expression, Command     classes base dos nós
+        ├── SumExpr, SubExpr, MulExpr, DivExpr, ModExpr, PowExpr
+        ├── UMinusExpr, SinExpr, CosExpr
+        ├── NumberExpr, StringExpr, PiExpr, IdExpr
+        ├── AssignCommand, PrintCommand, BlockCommand, Program
+        ├── ASTVisitor              interface: um visit() por tipo de nó
+        ├── InterpreterVisitor      executa a AST (tipos + pilha de escopos)
+        ├── Value, Type             valor com tipo (DBL ou STR)
+        └── Operations              funções estáticas das operações
+```
 
 ## Gramática
 
@@ -28,44 +63,38 @@ expr ::= expr '+' expr | expr '-' expr | expr '*' expr | expr '/' expr
 ```
 
 Precedência (da menor para a maior): `+ -`, `* / %`, `-` unário, `**` (associativo à direita).
-Assim `-2**2` é `-(2**2)`. O CUP reporta **0 conflitos**.
-
-## Arquivos
-
-| Arquivo | Função | Requisito |
-| --- | --- | --- |
-| `src/main/jflex/scanner.jflex` | Tokens: `number` (devolve `Double`), `string` (devolve o texto **sem as aspas**), `{`, `}`, `**`, palavras reservadas. | R1, R4 |
-| `src/main/java/parser/Type.java` | Enumeração `DBL` e `STR`. | R2 |
-| `src/main/java/parser/Value.java` | Valor com tipo: campo `type` e campo `value` (`Object`), com construtores para `Double` e `String`. | R2 |
-| `src/main/java/parser/Operations.java` | Funções estáticas das operações: verificam os tipos, convertem e devolvem um `Value`. | R3 |
-| `src/main/cup/parser.cup` | Gramática e ações semânticas; a pilha de escopos fica na seção `action code`. | R2, R4, R5 |
-| `src/main/java/parser/Main.java` | Abre o arquivo (UTF-8), cria `Scanner` e `Parser` e chama `parse()`. | |
+Assim `-2**2` é `-4`. O CUP reporta **0 conflitos**.
 
 ## Como cada requisito foi feito
 
-**R1/R2: tipos.** As expressões do CUP são do tipo `Value`. Um número vira
-`new Value(Double)` e uma cadeia vira `new Value(String)`.
+**R1: string.** O scanner reconhece `"..."` (um ou mais caracteres) e devolve o texto **sem as
+aspas**; o parser cria um `StringExpr`.
 
-**R3: operações** (`Operations.java`):
+**R2: tipos.** Todo valor é um `Value` (campo `type` e campo `value`). `NumberExpr` e
+`StringExpr` já nascem com o `Value` correspondente.
+
+**R3: operações** (`Operations.java`, chamadas pelo `InterpreterVisitor`):
 
 | Operação | Regra |
 | --- | --- |
 | `+` | número + número = número; se algum lado for cadeia, concatena (o número é convertido em texto) |
 | `- * / % **`, `-` unário, `sin`, `cos` | só com números; senão: `Tipos incompatíveis para ...` |
-| atribuição | sem mudança: guarda o `Value` como está |
+| atribuição | guarda o `Value` como está |
 | `print(e)` | imprime `>> ` seguido do valor |
 
-**R4/R5: blocos e escopos.** A tabela de símbolos é
-`Stack<HashMap<String, Value>>` (em `action code` do `parser.cup`):
+**R4: blocos.** `{` e `}` são tokens; `command_block` vira um `BlockCommand`, que guarda a lista de
+comandos do bloco.
 
-- a pilha começa com **uma** tabela, o escopo global, que dura todo o programa;
-- `{` faz `push` de uma tabela nova (ação no meio da regra, logo após o `{`);
-- `}` faz `pop`, descartando as variáveis daquele bloco;
-- **ler** uma variável procura do topo para a base (`ListIterator`, sem desempilhar); se
-  nenhuma tabela tiver o nome, erro: `Variável não definida: x`;
-- **atribuir** grava sempre na tabela do **topo** (`peek`). Se o nome já existia num escopo
-  externo, a variável é *redefinida* no bloco (sombreamento) e o valor externo fica
-  intacto quando o bloco termina.
+**R5: escopos** (`InterpreterVisitor`). A tabela de símbolos é
+`Stack<HashMap<String, Value>>`:
+
+- a pilha nasce com **uma** tabela, o escopo global, que dura o programa inteiro;
+- `visit(BlockCommand)` faz `push` de uma tabela nova, executa os comandos e faz `pop`;
+- **ler** uma variável (`visit(IdExpr)`) procura do topo para a base com um `ListIterator`, sem
+  desempilhar; se nenhuma tabela tiver o nome: `Variável não definida: x`;
+- **atribuir** (`visit(AssignCommand)`) grava sempre na tabela do **topo** (`peek`). Se o nome já
+  existia num escopo externo, a variável é *redefinida* no bloco (sombreamento) e o valor
+  externo fica intacto quando o bloco termina.
 
 ## Como executar
 
@@ -105,3 +134,5 @@ java -jar target/tiposescopos-1.0-jar-with-dependencies.jar teste.input
   `""` (vazia) não é aceita. Não há sequências de escape.
 - Um bloco precisa ter ao menos um comando (`{ }` vazio é erro de sintaxe), conforme a gramática.
 - O exemplo do enunciado usa `printf(...)`; o comando da gramática é `print`.
+- O `pom.xml` usa o `build-helper-maven-plugin` (como no exemplo "AST Expression Parser") para
+  incluir o `Parser` e o `Scanner` gerados no caminho de fontes; assim o VS Code também os enxerga.

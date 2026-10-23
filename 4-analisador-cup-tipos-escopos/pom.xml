@@ -9,14 +9,12 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mainClass>parser.Main</mainClass>
+        <mainClass>interpreter.Main</mainClass>
     </properties>
 
     <dependencies>
-        <!-- Dependência do Runtime do CUP -->
         <dependency>
             <groupId>com.github.vbmacher</groupId>
             <artifactId>java-cup-runtime</artifactId>
@@ -26,27 +24,18 @@
 
     <build>
         <plugins>
-            <!-- Plugin do JFlex para gerar o Scanner.java automaticamente -->
+
+            <!-- 0) Compilador Java 17 (declaração explícita!) -->
             <plugin>
-                <groupId>de.jflex</groupId>
-                <artifactId>jflex-maven-plugin</artifactId>
-                <version>1.9.1</version>
-                <executions>
-                    <execution>
-                        <id>generate-scanner</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/generated-sources/jflex</outputDirectory>
-                            <lexFile>src/main/jflex/scanner.jflex</lexFile>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>17</release>
+                </configuration>
             </plugin>
 
-            <!-- Plugin do CUP para gerar o Parser.java e sym.java automaticamente -->
+            <!-- 1) CUP -->
             <plugin>
                 <groupId>com.github.vbmacher</groupId>
                 <artifactId>cup-maven-plugin</artifactId>
@@ -68,13 +57,82 @@
                 </executions>
             </plugin>
 
-            <!-- Plugin para empacotar o executável com dependências (Fat JAR) -->
+            <!-- 2) JFlex -->
+            <plugin>
+                <groupId>de.jflex</groupId>
+                <artifactId>jflex-maven-plugin</artifactId>
+                <version>1.9.1</version>
+                <executions>
+                    <execution>
+                        <id>generate-scanner</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated-sources/jflex</outputDirectory>
+                            <lexFile>src/main/jflex/scanner.jflex</lexFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 3) build-helper -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>add-generated-sources</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/cup</source>
+                                <source>${project.build.directory}/generated-sources/jflex</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 4) Desativa o JAR simples -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 5) Desativa o install padrão -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.2</version>
+                <executions>
+                    <execution>
+                        <id>default-install</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 6) Fat JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.6.0</version>
                 <executions>
                     <execution>
+                        <id>make-fat-jar</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -92,6 +150,8 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 </project>
+
