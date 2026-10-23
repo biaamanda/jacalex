@@ -1,0 +1,5 @@
+print("Olá mundo");
+msg = "Olá ";
+print(msg + " Marco");
+x = 4.0;
+print("O valor de " + x + " ao quadrado é " + x**2);
