@@ -14,9 +14,9 @@ public class Main {
                     java.io.FileInputStream stream = new java.io.FileInputStream(args[0]);
                     reader = new java.io.InputStreamReader(stream, java.nio.charset.StandardCharsets.UTF_8);
                 } catch (java.io.FileNotFoundException e) {
-                    System.out.println("Arquivo não encontrado : \"" + args[0] + "\"");
+                    System.out.println("Arquivo nao encontrado : \"" + args[0] + "\"");
                 } catch (Exception e) {
-                    System.out.println("Exceção de arquivo: " + e);
+                    System.out.println("Exceçao de arquivo: " + e);
                 }
             }
         }
@@ -28,7 +28,7 @@ public class Main {
             Parser parser = new Parser(scanner);
             parser.parse();
         } catch (Exception e) {
-            System.out.println("Exceção: " + e.getMessage());
+            System.out.println("Exceçao: " + e.getMessage());
         }
     }
 }
