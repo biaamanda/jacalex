@@ -1,0 +1,12 @@
+x = 3;
+y = 2;
+print("Testes:");
+print(x + " + " + y + " = " + (x + y));
+print(x + " - " + y + " = " + (x - y));
+print(x + " * " + y + " = " + (x * y));
+print(x + " / " + y + " = " + (x / y));
+print(x + " % " + y + " = " + (x % y));
+print( " -" + x + " = " + (-x));
+print("O seno de " + PI/4 + " é " + sin(PI/4));
+print("O coseno de " + PI/4 + " é " + cos(PI/4));
+print("Calculando: " + (sin(PI/4)**2 + cos(PI/4)**2));
