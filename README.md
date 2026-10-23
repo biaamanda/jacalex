@@ -12,7 +12,7 @@ Cada pasta é um projeto Maven independente, com o seu próprio `README.md`.
 | [`1-analisador-lexico`](1-analisador-lexico) | Léxico (Parte I) | JFlex | lista os tokens reconhecidos |
 | [`2-analisador-recursivo-descendente`](2-analisador-recursivo-descendente) | Sintático (Parte II) | descendente recursivo, escrito à mão | "Análise sintática terminada com sucesso!" |
 | [`3-analisador-cup`](3-analisador-cup) | Sintático (CUP) | LALR(1), gerado pelo CUP | "Análise sintática terminada com sucesso!" |
-| [`4-analisador-cup-tipos-escopos`](4-analisador-cup-tipos-escopos) | Interpretador (CUP) | ações semânticas, tipos e escopos | executa o programa e imprime os `print` |
+| [`4-analisador-cup-tipos-escopos`](4-analisador-cup-tipos-escopos) | Interpretador (CUP) | AST + Visitor, tipos e escopos | executa o programa e imprime os `print` |
 
 ## Como as partes se relacionam
 

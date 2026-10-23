@@ -1,4 +1,4 @@
-package parser;
+package interpreter;
 
 import java_cup.runtime.*;
 
