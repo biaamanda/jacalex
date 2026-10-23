@@ -14,9 +14,9 @@ public class Main {
                     java.io.FileInputStream stream = new java.io.FileInputStream(args[0]);
                     reader = new java.io.InputStreamReader(stream);
                 } catch (java.io.FileNotFoundException e) {
-                    System.out.println("Arquivo não encontrado : \"" + args[0] + "\"");
+                    System.out.println("Arquivo nao encontrado : \"" + args[0] + "\"");
                 } catch (Exception e) {
-                    System.out.println("Exceção de arquivo: " + e);
+                    System.out.println("Exceçao de arquivo: " + e);
                 }
             }
         }
@@ -29,7 +29,7 @@ public class Main {
             parser.parse();
             System.out.println("Análise sintática terminada com sucesso!");
         } catch (Exception e) {
-            System.out.println("Exceção: " + e.getMessage());
+            System.out.println("Exceçao: " + e.getMessage());
         }
     }
 }
