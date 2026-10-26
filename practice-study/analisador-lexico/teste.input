@@ -1,0 +1,23 @@
+_valor1 = 10;
+decimal = 12.5;
+cientifico = 1.2e-3;
+expoente = 2E+4;
+outro = 3e2;
+ifx = _valor1 + 2 - 1;
+resultado = (ifx * 3) / 2 % 4;
+
+while (_valor1<=20) {
+    _valor1 = _valor1 + 1;
+}
+
+if (_valor1>=10) then {
+    resultado = 1;
+} else {
+    resultado = 0;
+}
+
+if (_valor1==20) then { ; }
+if (_valor1!=0) then { ; }
+if (_valor1<30) then { ; }
+if (_valor1>5) then { ; }
+;
