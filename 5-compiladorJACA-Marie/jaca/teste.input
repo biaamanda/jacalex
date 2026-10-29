@@ -2,7 +2,7 @@
 read(x);
 print(x);
 print(2);
-y = 3.5;
+y = 7;
 print(y - 3);
 if(y-4>0) then{ #Comentário
     print(y);
@@ -14,5 +14,5 @@ while(i<=10) {
     print(i);
     i = i + 1;
 }
-print(--6.02);
+print(--6);
 ;;;;
