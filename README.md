@@ -13,6 +13,7 @@ Cada pasta é um projeto Maven independente, com o seu próprio `README.md`.
 | [`2-analisador-recursivo-descendente`](2-analisador-recursivo-descendente) | Sintático (Parte II) | descendente recursivo, escrito à mão | "Análise sintática terminada com sucesso!" |
 | [`3-analisador-cup`](3-analisador-cup) | Sintático (CUP) | LALR(1), gerado pelo CUP | "Análise sintática terminada com sucesso!" |
 | [`4-analisador-cup-tipos-escopos`](4-analisador-cup-tipos-escopos) | Interpretador (CUP) | AST + Visitor, tipos e escopos | executa o programa e imprime os `print` |
+| [`5-compiladorJACA-Marie/jaca-marie`](5-compiladorJACA-Marie/jaca-marie) | Compilador (CUP) | AST + Visitor que gera código | assembly do MARIE |
 
 ## Como as partes se relacionam
 
@@ -28,6 +29,8 @@ texto do programa ──▶ analisador léxico ──▶ tokens ──▶ analis
   automaticamente a partir da gramática, em vez de escrito à mão.
 - A pasta **4** usa outra linguagem (calculadora com `print`, variáveis, cadeias e blocos) e vai
   além de validar: executa o programa, com verificação de tipos e escopos de variáveis.
+- A pasta **5** volta a Jaca: em vez de interpretar o programa, o `Compiler` (um Visitor sobre a
+  AST) o **traduz para assembly do MARIE**, um processador didático de 16 bits.
 
 A Parte I também está preservada na tag `parte-1` do repositório.
 

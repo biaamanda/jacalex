@@ -1,0 +1,6 @@
+# Soma, diferença e produto de dois números lidos
+read(a);
+read(b);
+print(a + b);
+print(a - b);
+print(a * b);

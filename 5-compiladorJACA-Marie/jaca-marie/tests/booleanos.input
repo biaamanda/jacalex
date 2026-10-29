@@ -1,0 +1,17 @@
+# Booleanos: guardados em variáveis, usados em if/while e comparados
+a = 2;
+b = 7;
+menor = a < b;
+if (menor) then { print(1); } else { print(0); }
+igual = a == b;
+if (igual) then { print(1); } else { print(0); }
+print(menor == igual);
+print(menor != igual);
+print((a < b) == (b > a));
+cont = 0;
+rodando = cont < 3;
+while (rodando) {
+    cont = cont + 1;
+    rodando = cont < 3;
+}
+print(cont);
