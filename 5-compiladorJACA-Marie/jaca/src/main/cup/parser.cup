@@ -21,6 +21,14 @@ parser code {:
     public parser.ast.ASTNode getAST() {
         return this.astRoot;
     }
+
+    // Conta os erros de sintaxe: o CUP se recupera e continua, mas um
+    // compilador não deve gerar código a partir de um programa inválido
+    private int errorCount = 0;
+
+    public boolean hasErrors() {
+        return errorCount > 0;
+    }
     private String lastExpectedSymbols = "";
 
     private String expectedSymbols() {
@@ -36,6 +44,7 @@ parser code {:
 
     @Override
     public void report_error(String message, Object info) {
+        errorCount++;
         Symbol sym = (Symbol) info;
         if (sym != null)
             System.err.println("Erro de sintaxe próximo de \"" + sym.value +
@@ -57,6 +66,7 @@ parser code {:
 
     @Override
     public void syntax_error(Symbol sym) {
+        errorCount++;
         System.err.println("Erro de sintaxe inesperado em \"" + sym.value +
                         "\" na linha " + (sym.left + 1) + ", coluna " + (sym.right + 1) +
                         "; símbolos esperados: " + expectedSymbols());
