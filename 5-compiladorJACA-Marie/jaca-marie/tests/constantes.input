@@ -1,0 +1,8 @@
+# Limites do inteiro de 16 bits e constantes negativas
+print(32767);
+print(-32768);
+x = -5;
+print(x);
+print(x - -3);
+print(--x);
+print(32767 - 1);
